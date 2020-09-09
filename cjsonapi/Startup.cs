@@ -23,7 +23,17 @@ namespace cjsonapi
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
-        {
+        { 
+             services.AddCors(options =>
+                {
+                    options.AddPolicy(name: "AllowOrigin",
+                        builder =>
+                        {
+                            builder.WithOrigins("http://localhost:1212",
+                                "http://localhost:2121")
+                                    .WithMethods("{POST}", "GET");
+                        });
+                });
             services.AddControllers();
         }
 
@@ -34,8 +44,10 @@ namespace cjsonapi
             {
                 app.UseDeveloperExceptionPage();
             }
-
+ 
             app.UseRouting();
+            
+            app.UseCors();
 
             app.UseAuthorization();
 

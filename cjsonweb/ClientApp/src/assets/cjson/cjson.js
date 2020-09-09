@@ -99,8 +99,8 @@
         }
 
         // while queue not empty
-        while( queue.length > 0 ) {
-            // remove a ode from the queue,
+        while( queue.length > 0 ) { // remove a ode from the queue
+
             node = queue.shift();
             numChildren = 0;
 
@@ -108,6 +108,7 @@
             for ( key in node.children ) {
 
                 if ( Object.hasOwnProperty.call( node.children, key ) ) {
+
                     queue.push( node.children[key] );
                     numChildren += 1;
                 }
@@ -150,25 +151,22 @@
 
         if ( templates.length > 0 ) {
 
-            return JSON.stringify( { "f": "cjson", "t": templates, 
-                "v": values }, null, null );
-        } else {
-            // no templates, so no compression is possible.
-            return JSON.stringify( value );
+            return JSON.stringify({ "f": "cjson", "t": templates, "v": values }, null, null);
+        } else { // no templates, so no compression is possible.
+
+            return JSON.stringify(value);
         }
     }
 
     function getKeys( templates, index ) {
         
         var keys = [];
-
-        console.log( templates );
+ 
         while( index > 0 ) {
             keys = templates[index-1].slice( 1 ).concat( keys );
             index = templates[index-1][0];
         }
-
-        console.log( keys );
+ 
         return keys;
     }
 
@@ -203,11 +201,18 @@
         return result;
     }
 
-    function Expand( str ) {
+    function Expand( json ) {
 
-        var value = JSON.parse( str );
-        if ( typeof value !== "object" || !("f" in value) || value["f"] !== "cjson" ){
-            // not in cjson format. Return as is.
+        var value;
+        if ( typeof json === 'object' ) {
+            
+            value = json;
+        } else {
+             
+            value = JSON.parse( json );
+        }
+       
+        if ( typeof value !== "object" || !("f" in value) || value["f"] !== "cjson" ) { // not in cjson format. Return as is.
             return value;
         }
 
@@ -215,7 +220,7 @@
     }
 
     window.CJSON = {};
-    window.CJSON.stringify = Compress;
-    window.CJSON.parse = Expand;
+    window.CJSON.compress = Compress;
+    window.CJSON.expand = Expand;
 
 })();
