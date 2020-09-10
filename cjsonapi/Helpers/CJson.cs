@@ -82,7 +82,7 @@ namespace Zenople.Application.WebApi.Helpers
                     result = Array.Empty<dynamic>(); // process each item in the array.
                     for (i = 0; i < value.Length; i++)
                     {
-                        result.push(ProcessExpand(templates, value[i]));
+                        result.Push(ProcessExpand(templates, value[i]));
                     }
                 }
                 else  // if it's an object, then recreate the keys from the template // and expand.
@@ -132,7 +132,7 @@ namespace Zenople.Application.WebApi.Helpers
 
                     for (i = 0; i < value.Length; i++)
                     {
-                        result.push(ProcessValue(root, value[i]));
+                        result.Push(ProcessValue(root, value[i]));
                     }
                 }
                 else
@@ -146,10 +146,10 @@ namespace Zenople.Application.WebApi.Helpers
                         if (value && value[key.Name] != null)
                         {
                             node = Follow(node, key.Name);  // follow the node. 
-                            result[""].push(ProcessValue(root, value[key.Name])); // add its value to the array.
+                            result[""].Push(ProcessValue(root, value[key.Name])); // add its value to the array.
                         }
                     }
-                    node.links.push(result);
+                    node.links.Push(result);
                 }
             }
             else
@@ -189,7 +189,7 @@ namespace Zenople.Application.WebApi.Helpers
             {
                 if (root && root.children[key.Name] != null)
                 {
-                    queue.push(root.children[key.Name]);
+                    queue.Push(root.children[key.Name]);
                 }
             }
 
@@ -205,7 +205,7 @@ namespace Zenople.Application.WebApi.Helpers
                 {
                     if (node && node.children[key.Name] != null)
                     {
-                        queue.push(node.children[key.Name]);
+                        queue.Push(node.children[key.Name]);
                         numChildren += 1;
                     }
                 }
@@ -225,7 +225,7 @@ namespace Zenople.Application.WebApi.Helpers
                     }
 
                     template.unshift(cur.templateIndex);
-                    templates.push(template);
+                    templates.Push(template);
                     node.templateIndex = templates.Length;
 
                     for (i = 0; i < node.links.Length; i++)
