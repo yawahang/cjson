@@ -4,7 +4,6 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Cors;
-using Newtonsoft.Json;
 using cjsonapi.Helpers;
 
 namespace cjsonapi.Controllers

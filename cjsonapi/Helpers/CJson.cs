@@ -3,7 +3,7 @@ using System;
 
 namespace Zenople.Application.WebApi.Helpers
 {
-    class CJson
+      class CJson
     {
         /**
           By Steve Hanov
@@ -11,9 +11,8 @@ namespace Zenople.Application.WebApi.Helpers
         */
 
         /* 
-           CJSON.stringify() to convert from objects to string
-           CJSON.parse() to convert from string to objects.
-           More documentation is pending.
+           Compress to convert from JSON to CJson
+           Expand to convert from CJson to JSON.
         */
 
         /*
@@ -143,7 +142,7 @@ namespace Zenople.Application.WebApi.Helpers
                     // it's an object. For each key
                     foreach (var key in value)
                     {
-                        if (value && value[key.Name] != null)
+                        if (value.ContainsKey(key.Name) == true)
                         {
                             node = Follow(node, key.Name);  // follow the node. 
                             result[""].Push(ProcessValue(root, value[key.Name])); // add its value to the array.
@@ -162,13 +161,14 @@ namespace Zenople.Application.WebApi.Helpers
 
         private dynamic Follow(dynamic root, dynamic key)
         {
-            if (root.children.ContainsKey(key))
+            if (root != null && root.children != null && root.children.ContainsKey(key) == true)
             {
                 return root.children[key];
             }
             else
             {
-                root.children[key] = new Node(this, key);
+                root.children = JsonConvert.DeserializeObject("{}");
+                root.children[key] = new Node(root, key);
                 return root.children[key];
             }
         }
@@ -187,7 +187,7 @@ namespace Zenople.Application.WebApi.Helpers
             root.templateIndex = 0;
             foreach (var key in root.children)
             {
-                if (root && root.children[key.Name] != null)
+                if (root.children.ContainsKey(key.Name) == true)
                 {
                     queue.Push(root.children[key.Name]);
                 }
@@ -195,15 +195,18 @@ namespace Zenople.Application.WebApi.Helpers
 
             // while queue not empty
             while (queue.Length > 0)
-            { // remove a ode from the queue
+            {
+                // remove a node from the queue
+                Array.ConstrainedCopy(queue, 1, queue, 0, queue.Length - 1);
+                queue[queue.Length - 1] = 0;
+                node = queue;
 
-                node = queue.shift();
                 numChildren = 0;
 
                 // add its children to the queue.
                 foreach (var key in node.children)
                 {
-                    if (node && node.children[key.Name] != null)
+                    if (node && node.children.ContainsKey(key.Name) == true)
                     {
                         queue.Push(node.children[key.Name]);
                         numChildren += 1;
@@ -220,17 +223,17 @@ namespace Zenople.Application.WebApi.Helpers
                     // id is reached.
                     while (cur.templateIndex == null)
                     {
-                        template.unshift(cur.key);
+                        template = template.Prepend(cur.key);
                         cur = cur.parent;
                     }
 
-                    template.unshift(cur.templateIndex);
+                    template = template.Prepend(cur.templateIndex);
                     templates.Push(template);
                     node.templateIndex = templates.Length;
 
                     for (i = 0; i < node.links.Length; i++)
                     {
-                        node.links[i][""].unshift(node.templateIndex);
+                        node.links[i][""] = template.Prepend(node.templateIndex);
                     }
                 }
             }
@@ -243,17 +246,17 @@ namespace Zenople.Application.WebApi.Helpers
     {
         public dynamic parent;
         public dynamic key;
-        public dynamic children = Array.Empty<dynamic>();
+        public dynamic children;
         public dynamic templateIndex;
-        public dynamic links = Array.Empty<dynamic>();
+        public dynamic links;
 
         public Node(dynamic parent, dynamic key)
         {
             this.parent = parent;
             this.key = key;
-            this.children = Array.Empty<dynamic>(); ;
+            this.children = null;
             this.templateIndex = null;
-            this.links = Array.Empty<dynamic>(); ;
+            this.links = null;
         }
     }
 }
