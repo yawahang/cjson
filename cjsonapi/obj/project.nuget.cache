@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "g58KVTW5QR9hA47etFme3pgKQT/S4s2aQI4O+UIFklnA61zcBRZD+loZiwaPwlX6fbkdKxXy60O5vXXdpgrgZg==",
+  "dgSpecHash": "cmmemsFyDV6NPLgtVCY8bqRXDR6H8onrBQyi/Elo6/Shnv0FJnRSdDJjN18YSKnavHTKWb1g/Vy5HdhduxTCvA==",
   "success": true,
   "projectFilePath": "D:\\MonsooN\\Work\\CJson\\cjsonapi\\cjsonapi.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\yawah\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512"
+  ],
   "logs": []
 }
