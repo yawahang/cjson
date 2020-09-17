@@ -8,7 +8,8 @@
     "build:ssr": "ng run cjsonweb:server:dev",
     "test": "ng test",
     "lint": "ng lint",
-    "e2e": "ng e2e"
+    "e2e": "ng e2e",
+    "allocate-serve":"node --max_old_space_size=2121 ./node_modules/@angular/cli/bin/ng serve"
   },
   "private": true,
   "dependencies": {
