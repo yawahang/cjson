@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace Zenople.Application.WebApi.Helpers
+namespace cjsonapi.Helpers
 {
-      class CJson
+    public class CJson
     {
         /**
           By Steve Hanov

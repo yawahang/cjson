@@ -18,3 +18,5 @@ D:\MonsooN\Work\CJson\cjsonapi\obj\Debug\netcoreapp3.1\staticwebassets\cjsonapi.
 D:\MonsooN\Work\CJson\cjsonapi\obj\Debug\netcoreapp3.1\cjsonapi.dll
 D:\MonsooN\Work\CJson\cjsonapi\obj\Debug\netcoreapp3.1\cjsonapi.pdb
 D:\MonsooN\Work\CJson\cjsonapi\obj\Debug\netcoreapp3.1\cjsonapi.genruntimeconfig.cache
+D:\MonsooN\Work\CJson\cjsonapi\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll
+D:\MonsooN\Work\CJson\cjsonapi\obj\Debug\netcoreapp3.1\cjsonapi.csproj.CopyComplete
