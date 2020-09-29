@@ -8,12 +8,18 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 export class FetchDataComponent {
 
   apiUrl = 'http://localhost:1212/';
-  forecasts =
+  forecasts = [
     {
       'date': '2020-09-09',
       'temperatureC': 35,
       'summary': 'Freezing'
-    };
+    },
+    {
+      'date': '2020-09-10',
+      'temperatureC': 53,
+      'summary': 'Scorching'
+    }
+  ];
   header = new HttpHeaders();
 
   constructor(public http: HttpClient) {
