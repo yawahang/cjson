@@ -1,4 +1,4 @@
-/**
+/*
   By Steve Hanov
   Released to the public domain
 */
@@ -10,8 +10,7 @@
 */
 
 (function(){
-    /*jslint sub: true */
-
+   
     // We keep track of object types that we have seen in a tree.
     function Node( parent, key ) {
         

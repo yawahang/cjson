@@ -1,11 +1,13 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace cjsonapi.Helpers
 {
-    public class CJson
+    class CJson
     {
-        /**
+        /*
           By Steve Hanov
           Released to the public domain
         */
@@ -16,139 +18,79 @@ namespace cjsonapi.Helpers
         */
 
         /*
-          ***Note: Translated to C# from CJson Javascript
+          *** Note: Translated to C# from CJson Javascript
         */
         public CJson()
         {
 
         }
 
+        #region Compress
         public dynamic Compress(dynamic value)
         {
-            dynamic root;
+            Node root;
             dynamic templates;
             dynamic values;
 
             root = new Node(null, "");
-            values = ProcessValue(root, value);
+            values = Process(root, value);
+            values = JsonConvert.DeserializeObject<dynamic>(JsonConvert.SerializeObject(values));
             templates = CreateTemplates(root);
+            templates = JsonConvert.DeserializeObject<dynamic>(JsonConvert.SerializeObject(templates));
 
-            if (templates.Length > 0)
+            if (templates.Count > 0)
             {
-                value = "{ \"f\": \"cjson\", \"t\":" + templates + ", \"v\":" + values + "}";
-                return JsonConvert.DeserializeObject(value);
+                value = new { f = "cjson", t = templates, v = values };
+                return value;
             }
             else // no templates, so no compression is possible.
             {
-                return JsonConvert.DeserializeObject(value);
-            }
-        }
-
-        public dynamic Expand(dynamic json)
-        {
-
-            dynamic value;
-            Type valueType = json.GetType();
-            if (valueType.Name == "JObject")
-            {
-                value = json;
-            }
-            else
-            {
-                value = JsonConvert.DeserializeObject(json);
-            }
-
-            if (valueType.Name != "JObject" || (!value["f"] || value["f"] == null) || (value["f"] && value["f"] != "cjson")) // not in cjson format. Return as is.
-            {
                 return value;
             }
-
-            return ProcessExpand(value["t"], value["v"]);
-        }
-
-        private dynamic ProcessExpand(dynamic templates, dynamic value)
-        {
-            dynamic result;
-            dynamic i;
-            dynamic keys;
-
-            // if it's an array, then expand each element of the array.
-            Type valueType = value.GetType();
-            if ((valueType == typeof(object)) || (valueType.IsArray && value[0] == typeof(object)))
-            {
-                if (valueType.IsArray) // if it's an array
-                {
-                    result = Array.Empty<dynamic>(); // process each item in the array.
-                    for (i = 0; i < value.Length; i++)
-                    {
-                        result.Push(ProcessExpand(templates, value[i]));
-                    }
-                }
-                else  // if it's an object, then recreate the keys from the template // and expand.
-                {
-                    result = JsonConvert.DeserializeObject("{}");
-                    keys = GetKeys(templates, value[""][0]);
-                    for (i = 0; i < keys.Length; i++)
-                    {
-                        result[keys[i]] = ProcessExpand(templates, value[""][i + 1]);
-                    }
-                }
-            }
-            else
-            {
-                result = value;
-            }
-
-            return result;
-        }
-
-        private dynamic GetKeys(dynamic templates, dynamic index)
-        {
-            dynamic keys = Array.Empty<dynamic>();
-
-            while (index > 0)
-            {
-                keys = templates[index - 1].slice(1).concat(keys);
-                index = templates[index - 1][0];
-            }
-
-            return keys;
         }
 
         // Given the root of the key tree, process the value possibly adding to the // key tree.
-        private dynamic ProcessValue(dynamic root, dynamic value)
+        private dynamic Process(Node root, dynamic value)
         {
             dynamic result;
             dynamic i;
-            dynamic node;
+            Node node;
 
             Type valueType = value.GetType();
             if (valueType.Name == "JObject")
             {
                 if (valueType.IsArray) // if it's an array
                 {
-                    result = Array.Empty<dynamic>(); // process each item in the array.
+                    ArrayList result1 = new ArrayList();
 
                     for (i = 0; i < value.Length; i++)
                     {
-                        result.Push(ProcessValue(root, value[i]));
+                        result1.Add(Process(root, value[i]));
                     }
+
+                    result = result1;
                 }
                 else
                 {
                     node = root;
-                    result = JsonConvert.DeserializeObject("{\"\":[]}");
+                    IDictionary<string, object> result2 = new Dictionary<string, object>();
+                    result2.Add("", new List<object>());
+
+                    ArrayList resultList = new ArrayList();
 
                     // it's an object. For each key
                     foreach (var key in value)
                     {
                         if (value.ContainsKey(key.Name) == true)
                         {
-                            node = Follow(node, key.Name);  // follow the node. 
-                            result[""].Push(ProcessValue(root, value[key.Name])); // add its value to the array.
+                            node = node.Follow(key.Name);  // follow the node. 
+                            resultList.Add(Process(root, value[key.Name])); // add its value to the array.
                         }
                     }
-                    node.links.Push(result);
+
+                    result2[""] = resultList;
+                    node.links.Add(result2);
+                    result = result2;
                 }
             }
             else
@@ -159,104 +101,106 @@ namespace cjsonapi.Helpers
             return result;
         }
 
-        private dynamic Follow(dynamic root, dynamic key)
-        {
-            if (root != null && root.children != null && root.children.ContainsKey(key) == true)
-            {
-                return root.children[key];
-            }
-            else
-            {
-                root.children = JsonConvert.DeserializeObject("{}");
-                root.children[key] = new Node(root, key);
-                return root.children[key];
-            }
-        }
-
         // Given the root of the key tree, return the array of template arrays.
-        private dynamic CreateTemplates(dynamic root)
+        private ArrayList CreateTemplates(Node root)
         {
-            dynamic templates = Array.Empty<dynamic>();
-            dynamic queue = Array.Empty<dynamic>();
+            ArrayList templates = new ArrayList();
+            ArrayList queue = new ArrayList();
             dynamic node;
-            dynamic template;
+            ArrayList template = new ArrayList();
             dynamic cur;
             dynamic i;
             dynamic numChildren;
 
             root.templateIndex = 0;
-            foreach (var key in root.children)
+            var keys = root.children.Keys;
+            foreach (var key in keys)
             {
-                if (root.children.ContainsKey(key.Name) == true)
-                {
-                    queue.Push(root.children[key.Name]);
-                }
+                queue.Add(root.children[key]);
             }
 
-            // while queue not empty
-            while (queue.Length > 0)
+            // while queue not empty 
+            while (queue.Count > 0)
             {
                 // remove a node from the queue
-                Array.ConstrainedCopy(queue, 1, queue, 0, queue.Length - 1);
-                queue[queue.Length - 1] = 0;
-                node = queue;
+                node = queue[0];
+                queue.RemoveAt(0);
 
                 numChildren = 0;
 
-                // add its children to the queue.
-                foreach (var key in node.children)
+                // add its children to the queue. 
+                var nodeKeys = node.children.Keys;
+                foreach (var key in nodeKeys)
                 {
-                    if (node && node.children.ContainsKey(key.Name) == true)
-                    {
-                        queue.Push(node.children[key.Name]);
-                        numChildren += 1;
-                    }
+                    queue.Add(node.children[key]);
+                    numChildren += 1;
                 }
 
                 // if the node had more than one child, or it has links,
-                if (numChildren > 1 || node.links.Length > 0)
+                int lenC = node.links.Count;
+                if (numChildren > 1 || lenC > 0)
                 {
-                    template = Array.Empty<dynamic>(); ;
                     cur = node;
 
                     // follow the path up from the node until one with a template
                     // id is reached.
                     while (cur.templateIndex == null)
                     {
-                        template = template.Prepend(cur.key);
+                        template.Insert(0, cur.key);
                         cur = cur.parent;
                     }
 
-                    template = template.Prepend(cur.templateIndex);
-                    templates.Push(template);
-                    node.templateIndex = templates.Length;
+                    template.Insert(0, cur.templateIndex);
+                    templates.Add(template);
+                    node.templateIndex = templates.Count;
 
-                    for (i = 0; i < node.links.Length; i++)
+                    int len = node.links.Count;
+                    for (i = 0; i < len; i++)
                     {
-                        node.links[i][""] = template.Prepend(node.templateIndex);
+                        if (i > node.links.Count)
+                        {
+                            var a = "error";
+                        }
+
+                        template.Insert(0, node.templateIndex);
+                        node.links[i][""] = template;
                     }
                 }
             }
 
             return templates;
         }
+        #endregion Compress
     }
 
     class Node
     {
         public dynamic parent;
         public dynamic key;
-        public dynamic children;
+        public IDictionary<string, object> children;
         public dynamic templateIndex;
-        public dynamic links;
+        public List<object> links;
 
         public Node(dynamic parent, dynamic key)
         {
             this.parent = parent;
             this.key = key;
-            this.children = null;
+            this.children = new Dictionary<string, object>();
             this.templateIndex = null;
-            this.links = null;
+            this.links = new List<object>();
+        }
+
+        public Node Follow(dynamic key)
+        {
+            if (this.children != null && this.children.ContainsKey(key) == true)
+            {
+                return this.children[key];
+            }
+            else
+            {
+                this.children.Add(key, new Node(this, key));
+                return this.children[key];
+            }
         }
     }
 }
